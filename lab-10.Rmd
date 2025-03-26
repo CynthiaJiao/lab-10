@@ -1,7 +1,7 @@
 ---
 title: "Lab 10 - Grading the professor, Pt. 2"
-author: "Insert your name here"
-date: "Insert date here"
+author: "Cynthia Jiao"
+date: "3/24/2025"
 output: github_document
 ---
 
@@ -15,22 +15,111 @@ library(openintro)
 
 ## Exercise 1
 
-*Provide your answer here.*  
-Add code chunks as needed. Ensure code chunks are properly labeled without spaces.
+
+The slope is 0.067, and intercept is 3.88. R-squared is 0.035; adjusted R-squared is 0.033
+
+score = 0.067(bty_avg) + 3.88
 
 ```{r exercise1_code}
-# Add your R code here
+
+?evals
+
+m_bty <-lm(score ~ bty_avg, data = evals)
+summary(m_bty)
+
+
 ```
 
-## Exercise 2
+## Exercise 2 to 9
 
-*Provide your answer here.*  
-Add code chunks as needed.
+2. score = 3.95 + 0.03(bty_avg) − 0.18(gender) + 0.08(bty_avg*gender). R-squared = 0.071, adjusted R-squared = 0.065
+
+3. intercept (3.95) represents the predicted teaching evaluation score for a female instructor (when gender = 0) whose beauty average (bty_avg) is 0.
+
+4. 6.5% variance in score is explained by m_bty_gen
+
+5. equation for male professors: score = 0.11(bty_avg) + 3.77
+
+6. equation for female professors: score = 0.03(bty_avg) + 3.95. When two professors receive the same beauty rating below 2.25, female professors tend to have higher evaluation scores. But when the beauty score exceeds 2.25, male professors tend to have higher evaluation scores.
+
+7. Female professors: the slope is 0.03. For each one-unit increase in beauty rating, female professors' evaluation scores are predicted to increase by 0.03 points. This relationship is weak and not statistically significant (p = 0.2), meaning beauty doesn't strongly predict evaluation scores for females.
+
+Male professors: the slope is 0.11. For each one-unit increase in beauty rating, male professors' evaluation scores are predicted to increase by 0.11 points. This relationship is stronger than that of female professors, but still not significant (p = 0.23).
+
+8. the adjusted R-squared increases by 0.032 from the m_bty model, this suggests that adding gender to the model, particularly the interaction term between gender and beauty, helps to explain more of the variability in course evaluation scores.
+
+9. The slope of bty_avg decreases drastically when gender is added to the model. This means that bty_avg alone is no longer a significant predictor of score, when other predictors are controlled (i.e., gender and its interaction with bty_avg).
 
 ```{r exercise2_code}
-# Add your R code here
+
+m_bty_gen <-lm(score ~ bty_avg * gender, data = evals)
+summary(m_bty_gen)
+
+
+```
+## Exercise 10
+
+10. score = 4.1 + 0.04(bty_avg) − 0.02(tenure track) − 0.41(tenured) − 0.03(bty_avg*tenure track) + 0.07(bty_avg*tenured)
+
+The linear model predicts course evaluation scores based on professors' beauty ratings and rank, including interactions. Teaching professors with a beauty score of 0 have an average evaluation score of 4.1. There is a significant effect of rank on evaluation score, but I am not sure which group is set as the reference by r, so I set teaching professor as the reference group and run the model again. The results suggest that there is a significant effect of rank on score such that teaching professors tend to have higher score than tenured professors (p = 0.007), whereas there is no significant difference of score between teaching and tenure track professor. The interaction between bty_avg and tenuredTeach contrast is also significant (p = 0.01), meaning that the evaluation scores differ based on beauty rating (bty_avg) and professor's rank (teaching or tenured).
+
+```{r exercise10_code}
+
+m_bty_rank <-lm(score ~ bty_avg * rank, data = evals)
+summary(m_bty_rank)
+
+# setting the teaching professor as the reference group
+evals$tenuredTeach <- dplyr::recode(evals$rank, 
+                       "teaching" = 0,
+                       "tenure track" = 0,
+                       "tenured" = 1)
+
+evals$ttrackTeach <- dplyr::recode(evals$rank, 
+                       "teaching" = 0,
+                       "tenure track" = 1,
+                       "tenured" = 0)
+
+m_bty_rank1 <-lm(score ~ bty_avg * tenuredTeach, data = evals)
+summary(m_bty_rank1)
+
+m_bty_rank2 <-lm(score ~ bty_avg * ttrackTeach, data = evals)
+summary(m_bty_rank2)
+
 ```
 
-## Additional Exercises
+## Exercise 11 to 13
 
-*Repeat the format above for additional exercises.*
+
+11. the worst predictor is probably cls_students I tried to think of all the possibilities but just cannot justify that the number of students can influence teacher's evaluation. Number of a class is more about course structure or for administrative purpose, and students likely don’t associate directly with how they rate the professor.
+
+12. score = 0.0002(cls_students) + 4.16
+The relationship is extremely weak and not significant. Number of students in class do not have effect on evaluation scores (p = 0.58). 
+
+13. I would not include cls_did_eval if cls_studnets and cls_perc_eval are already included, because the interaction between cls_studnets and cls_perc_eval is cls_did_eval, and including another cls_did_eval would be redundant.
+```{r exercise11_code}
+
+m_students <-lm(score ~ cls_students, data = evals)
+summary(m_students)
+
+```
+## Excercise 14 to 18
+
+15. score = 3.60 − 0.12(tenure track) − 0.03(tenured) + 0.22(minority) + 0.18(gender) − 0.01(age) + 0.01(cls_perc_eval) + 0.51(cls_credit) + 0.06(bty_avg)
+16. A slope of 0.22 of minority means that when the a professor is not minority (vs. monirty), their evaluation score will increase by 0.22 unit.
+A slope of -0.01 of age means that for every one year a professor ages, their evaluation score will decrease by 0.01 unit.
+17. a young, male, not minority, attractive professor who have high proportion of students responding to his one credit course tends to have the highest evaluation score.
+18. No, the characteristics in #17 seem to suggest that a very specific social group of professors is favored (young white males), and the sample was collected in Austin, TX. I would probably imagine the preference to be different in other states, e.g., California, Hawaii, or New York, where schools hire more diverse employees and students might have different preferences of professors (or even no preference for social group at all) due to increased exposure. Also even after fitting the model, the r-squared of 14.3% is still not very large, suggesting there are more variables that weren't tested but could explain the variance in evaluation score. 
+```{r exercise14_code}
+
+# fit everything except for the cls_did_eval
+m_full <- lm(score ~ rank + ethnicity + gender + language + age + 
+               cls_perc_eval * cls_students + cls_level + cls_profs + 
+               cls_credits + bty_avg, data = evals)
+summary(m_full)
+
+# remove cls_profs, cls_level, language, cls_students as they do not explain significantly more variance in the model
+
+m_full <- lm(score ~ rank + ethnicity + gender + age + 
+               cls_perc_eval + cls_credits + bty_avg, data = evals)
+summary(m_full)
+```
