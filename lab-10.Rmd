@@ -2,7 +2,7 @@
 title: "Lab 10 - Grading the professor, Pt. 2"
 author: "Cynthia Jiao"
 date: "3/24/2025"
-output: github_document
+output: md_document
 ---
 
 ## Load packages and data
